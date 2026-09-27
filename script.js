@@ -7,6 +7,11 @@ const uploadBox = document.getElementById("uploadBox");
 const uploadStatus = document.getElementById("uploadStatus");
 const mediaGrid = document.getElementById("mediaGrid");
 
+
+// ===============================
+// ABRIR GALERIA
+// ===============================
+
 uploadButton.addEventListener("click", () => {
   fileInput.click();
 });
@@ -15,24 +20,35 @@ uploadBox.addEventListener("click", () => {
   fileInput.click();
 });
 
-fileInput.addEventListener("change", async () => {
+
+// ===============================
+// ESCOLHEU FOTO
+// ===============================
+
+fileInput.addEventListener("change", () => {
+
   const arquivo = fileInput.files[0];
 
   if (!arquivo) return;
 
-  await enviarArquivo(arquivo);
+  enviarArquivo(arquivo);
 
-  fileInput.value = "";
 });
+
+
+// ===============================
+// UPLOAD CLOUDINARY
+// ===============================
 
 async function enviarArquivo(arquivo) {
 
-  uploadStatus.textContent = "Enviando imagem...";
+  uploadStatus.textContent = "Enviando foto...";
 
   const formData = new FormData();
 
   formData.append("file", arquivo);
   formData.append("upload_preset", UPLOAD_PRESET);
+
 
   try {
 
@@ -44,17 +60,47 @@ async function enviarArquivo(arquivo) {
       }
     );
 
+
     const dados = await resposta.json();
 
-    console.log("Cloudinary:", dados);
+    console.log("RESPOSTA CLOUDINARY:", dados);
 
-    if (!resposta.ok || !dados.secure_url) {
-      throw new Error(
-        dados.error?.message || "Não foi possível enviar a imagem."
-      );
+
+    if (!resposta.ok) {
+
+      const mensagem =
+        dados.error?.message ||
+        "Erro desconhecido no Cloudinary.";
+
+      throw new Error(mensagem);
     }
 
-    uploadStatus.textContent = "Imagem enviada com sucesso!";
+
+    if (!dados.secure_url) {
+
+      throw new Error(
+        "O Cloudinary não retornou a URL da imagem."
+      );
+
+    }
+
+
+    // SUCESSO
+
+    uploadStatus.innerHTML = `
+      <strong>Upload concluído!</strong>
+      <br>
+      URL gerada:
+      <br>
+      <a
+        href="${dados.secure_url}"
+        target="_blank"
+        style="word-break:break-all;"
+      >
+        ${dados.secure_url}
+      </a>
+    `;
+
 
     adicionarMidia(
       dados.secure_url,
@@ -62,14 +108,28 @@ async function enviarArquivo(arquivo) {
       arquivo.type
     );
 
+
   } catch (erro) {
 
-    console.error(erro);
+    console.error("ERRO UPLOAD:", erro);
 
-    uploadStatus.textContent =
-      "Erro no upload: " + erro.message;
+    uploadStatus.innerHTML = `
+      <strong>Erro no upload</strong>
+      <br>
+      ${escaparHTML(erro.message)}
+    `;
+
   }
+
+
+  fileInput.value = "";
+
 }
+
+
+// ===============================
+// ADICIONAR NA BIBLIOTECA
+// ===============================
 
 function adicionarMidia(url, nome, tipo) {
 
@@ -77,28 +137,35 @@ function adicionarMidia(url, nome, tipo) {
 
   card.className = "media-card";
 
-  let visual = "";
+
+  let visual;
+
 
   if (tipo.startsWith("video/")) {
 
     visual = `
-      <video
-        src="${url}"
-        controls
-        class="media-preview"
-      ></video>
+      <div class="media-image">
+        <video
+          src="${url}"
+          controls
+          style="width:100%;height:100%;object-fit:cover;"
+        ></video>
+      </div>
     `;
 
   } else {
 
     visual = `
-      <img
-        src="${url}"
-        alt="${escaparHTML(nome)}"
-        class="media-preview"
-      >
+      <div class="media-image">
+        <img
+          src="${url}"
+          alt="${escaparHTML(nome)}"
+        >
+      </div>
     `;
+
   }
+
 
   card.innerHTML = `
 
@@ -106,89 +173,116 @@ function adicionarMidia(url, nome, tipo) {
 
     <div class="media-info">
 
-      <strong>${escaparHTML(nome)}</strong>
+      <strong>
+        ${escaparHTML(nome)}
+      </strong>
 
-      <span>${tipo || "mídia"}</span>
+      <span>
+        ${tipo || "mídia"}
+      </span>
 
-      <div class="media-actions">
-
-        <button
-          class="copy"
-          data-url="${url}"
-        >
-          Copiar URL
-        </button>
-
-        <button
-          class="use-site"
-          data-url="${url}"
-          data-name="${escaparHTML(nome)}"
-        >
-          Usar no site
-        </button>
-
+      <div class="media-url">
+        ${escaparHTML(url)}
       </div>
 
+      <button
+        class="copy"
+        data-url="${url}"
+      >
+        Copiar URL
+      </button>
+
+      <button
+        class="use-site"
+        data-url="${url}"
+        data-name="${escaparHTML(nome)}"
+      >
+        Usar no site
+      </button>
+
     </div>
+
   `;
+
 
   mediaGrid.appendChild(card);
 
+
   ativarBotoes(card);
+
 }
+
+
+// ===============================
+// BOTÕES
+// ===============================
 
 function ativarBotoes(container) {
 
-  const botoesCopiar =
-    container.querySelectorAll(".copy");
 
-  botoesCopiar.forEach(botao => {
+  // COPIAR URL
 
-    botao.addEventListener("click", async () => {
+  container
+    .querySelectorAll(".copy")
+    .forEach(botao => {
 
-      const url = botao.dataset.url;
+      botao.addEventListener("click", async () => {
 
-      try {
+        const url = botao.dataset.url;
 
-        await navigator.clipboard.writeText(url);
+        try {
 
-        botao.textContent = "Copiado!";
+          await navigator.clipboard.writeText(url);
 
-        setTimeout(() => {
-          botao.textContent = "Copiar URL";
-        }, 1500);
+          botao.textContent = "Copiado!";
 
-      } catch {
+          setTimeout(() => {
 
-        alert("Não foi possível copiar a URL.");
-      }
+            botao.textContent = "Copiar URL";
 
-    });
+          }, 1500);
 
-  });
+        } catch {
 
-  const botoesUsar =
-    container.querySelectorAll(".use-site");
+          alert("Não foi possível copiar a URL.");
 
-  botoesUsar.forEach(botao => {
+        }
 
-    botao.addEventListener("click", () => {
-
-      abrirEscolhaLocal(
-        botao.dataset.url,
-        botao.dataset.name
-      );
+      });
 
     });
 
-  });
+
+  // USAR NO SITE
+
+  container
+    .querySelectorAll(".use-site")
+    .forEach(botao => {
+
+      botao.addEventListener("click", () => {
+
+        abrirEscolhaLocal(
+          botao.dataset.url,
+          botao.dataset.name
+        );
+
+      });
+
+    });
+
 }
+
+
+// ===============================
+// ESCOLHER LOCAL
+// ===============================
 
 function abrirEscolhaLocal(url, nome) {
 
   const modal = document.createElement("div");
 
   modal.className = "site-modal";
+
 
   modal.innerHTML = `
 
@@ -198,10 +292,12 @@ function abrirEscolhaLocal(url, nome) {
         ×
       </button>
 
-      <h2>Usar no site</h2>
+      <h2>
+        Usar no site
+      </h2>
 
       <p>
-        Onde você quer colocar esta imagem?
+        Onde você quer colocar esta foto?
       </p>
 
       <div class="site-options">
@@ -222,22 +318,24 @@ function abrirEscolhaLocal(url, nome) {
           👤 Perfil
         </button>
 
-        <button data-local="outro">
-          ✏️ Outro local
-        </button>
-
       </div>
 
     </div>
+
   `;
 
+
   document.body.appendChild(modal);
+
 
   modal
     .querySelector(".site-modal-close")
     .addEventListener("click", () => {
+
       modal.remove();
+
     });
+
 
   modal
     .querySelectorAll(".site-options button")
@@ -247,32 +345,45 @@ function abrirEscolhaLocal(url, nome) {
 
         const local = botao.dataset.local;
 
-        aplicarFotoNoSite(url, nome, local);
+        aplicarFotoNoSite(
+          url,
+          nome,
+          local
+        );
 
         modal.remove();
 
       });
 
     });
+
 }
+
+
+// ===============================
+// COLOCAR FOTO NO SITE
+// ===============================
 
 function aplicarFotoNoSite(url, nome, local) {
 
+
   if (local === "capa") {
 
-    const hero = document.querySelector(".hero");
+    const hero =
+      document.querySelector(".hero");
 
     if (hero) {
 
       hero.style.backgroundImage =
         `url("${url}")`;
 
-      alert("Imagem colocada na Capa.");
+      alert("Foto colocada na Capa.");
 
     }
 
     return;
   }
+
 
   if (local === "galeria") {
 
@@ -284,12 +395,13 @@ function aplicarFotoNoSite(url, nome, local) {
       imagem.src = url;
       imagem.alt = nome;
 
-      alert("Imagem colocada na Galeria.");
+      alert("Foto colocada na Galeria.");
 
     }
 
     return;
   }
+
 
   if (local === "projeto") {
 
@@ -301,12 +413,13 @@ function aplicarFotoNoSite(url, nome, local) {
       imagem.src = url;
       imagem.alt = nome;
 
-      alert("Imagem colocada no Projeto.");
+      alert("Foto colocada no Projeto.");
 
     }
 
     return;
   }
+
 
   if (local === "perfil") {
 
@@ -317,28 +430,19 @@ function aplicarFotoNoSite(url, nome, local) {
 
       imagem.src = url;
 
-      alert("Imagem colocada no Perfil.");
+      alert("Foto colocada no Perfil.");
 
     }
 
     return;
   }
 
-  if (local === "outro") {
-
-    const lugar =
-      prompt("Digite o local onde quer colocar a imagem:");
-
-    if (lugar) {
-
-      alert(
-        `Imagem "${nome}" selecionada para: ${lugar}`
-      );
-
-    }
-
-  }
 }
+
+
+// ===============================
+// SEGURANÇA HTML
+// ===============================
 
 function escaparHTML(texto) {
 
@@ -348,16 +452,24 @@ function escaparHTML(texto) {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#039;");
+
 }
 
 
-// Ativa os botões que já existem no HTML
+// ===============================
+// ATIVAR BOTÕES EXISTENTES
+// ===============================
+
 ativarBotoes(document);
 
 
-// Botão principal da plataforma
+// ===============================
+// BOTÃO COMEÇAR
+// ===============================
+
 const startButton =
   document.getElementById("startButton");
+
 
 if (startButton) {
 
@@ -377,5 +489,4 @@ if (startButton) {
   });
 
 }
-
 
