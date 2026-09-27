@@ -1,3 +1,8 @@
+// ===============================
+// WALKER MÍDIA
+// Cloudinary + Usar no site
+// ===============================
+
 const CLOUD_NAME = "mb1eetro";
 const UPLOAD_PRESET = "walker-midia";
 
@@ -9,40 +14,47 @@ const mediaGrid = document.getElementById("mediaGrid");
 
 
 // ===============================
-// ABRIR GALERIA
+// ABRIR GALERIA DO CELULAR
 // ===============================
 
-uploadButton.addEventListener("click", () => {
-  fileInput.click();
-});
+if (uploadButton) {
+  uploadButton.addEventListener("click", () => {
+    fileInput.click();
+  });
+}
 
-uploadBox.addEventListener("click", () => {
-  fileInput.click();
-});
-
-
-// ===============================
-// ESCOLHEU FOTO
-// ===============================
-
-fileInput.addEventListener("change", () => {
-
-  const arquivo = fileInput.files[0];
-
-  if (!arquivo) return;
-
-  enviarArquivo(arquivo);
-
-});
+if (uploadBox) {
+  uploadBox.addEventListener("click", () => {
+    fileInput.click();
+  });
+}
 
 
 // ===============================
-// UPLOAD CLOUDINARY
+// ESCOLHEU FOTO/VÍDEO
+// ===============================
+
+if (fileInput) {
+  fileInput.addEventListener("change", () => {
+
+    const arquivo = fileInput.files[0];
+
+    if (!arquivo) return;
+
+    enviarArquivo(arquivo);
+  });
+}
+
+
+// ===============================
+// UPLOAD PARA CLOUDINARY
 // ===============================
 
 async function enviarArquivo(arquivo) {
 
-  uploadStatus.textContent = "Enviando foto...";
+  if (uploadStatus) {
+    uploadStatus.textContent = "Enviando mídia...";
+  }
 
   const formData = new FormData();
 
@@ -69,7 +81,6 @@ async function enviarArquivo(arquivo) {
         dados.error?.message ||
         "Erro no upload."
       );
-
     }
 
     if (!dados.secure_url) {
@@ -77,14 +88,10 @@ async function enviarArquivo(arquivo) {
       throw new Error(
         "Cloudinary não retornou a URL."
       );
-
     }
 
 
-    // ===============================
-    // ATUALIZA O CARD EXISTENTE
-    // ===============================
-
+    // Atualiza a primeira foto da biblioteca
     atualizarFotoPrincipal(
       dados.secure_url,
       arquivo.name,
@@ -92,34 +99,30 @@ async function enviarArquivo(arquivo) {
     );
 
 
-    // ===============================
-    // MOSTRA URL
-    // ===============================
+    if (uploadStatus) {
 
-    uploadStatus.innerHTML = `
-      <strong>Upload concluído!</strong>
-      <br><br>
+      uploadStatus.innerHTML = `
+        <strong>Upload concluído!</strong>
+        <br><br>
 
-      <a
-        href="${dados.secure_url}"
-        target="_blank"
-        style="word-break:break-all;"
-      >
-        ${dados.secure_url}
-      </a>
-    `;
-
+        <span style="word-break:break-all;">
+          ${escaparHTML(dados.secure_url)}
+        </span>
+      `;
+    }
 
   } catch (erro) {
 
-    console.error("Erro:", erro);
+    console.error(erro);
 
-    uploadStatus.innerHTML = `
-      <strong>Erro no upload</strong>
-      <br>
-      ${escaparHTML(erro.message)}
-    `;
+    if (uploadStatus) {
 
+      uploadStatus.innerHTML = `
+        <strong>Erro no upload</strong>
+        <br>
+        ${escaparHTML(erro.message)}
+      `;
+    }
   }
 
   fileInput.value = "";
@@ -127,10 +130,12 @@ async function enviarArquivo(arquivo) {
 
 
 // ===============================
-// ATUALIZAR O CARD DA BIBLIOTECA
+// ATUALIZA FOTO DA BIBLIOTECA
 // ===============================
 
 function atualizarFotoPrincipal(url, nome, tipo) {
+
+  if (!mediaGrid) return;
 
   const primeiroCard =
     mediaGrid.querySelector(".media-card");
@@ -157,70 +162,56 @@ function atualizarFotoPrincipal(url, nome, tipo) {
     primeiroCard.querySelector(".use-site");
 
 
-  // FOTO
-
   if (imagem) {
 
     imagem.src = url;
     imagem.alt = nome;
-
   }
 
-
-  // NOME
 
   if (nomeArquivo) {
 
     nomeArquivo.textContent = nome;
-
   }
 
-
-  // TIPO
 
   if (tipoArquivo) {
 
     tipoArquivo.textContent =
       tipo || "Imagem";
-
   }
 
-
-  // URL
 
   if (urlArquivo) {
 
     urlArquivo.textContent = url;
-
   }
 
-
-  // BOTÃO COPIAR
 
   if (botaoCopiar) {
 
     botaoCopiar.dataset.url = url;
-
   }
 
-
-  // BOTÃO USAR NO SITE
 
   if (botaoUsar) {
 
     botaoUsar.dataset.url = url;
     botaoUsar.dataset.name = nome;
-
   }
-
 }
 
 
 // ===============================
-// BOTÕES
+// BOTÕES DA BIBLIOTECA
 // ===============================
 
 function ativarBotoes(container) {
+
+  if (!container) return;
+
+
+  // COPIAR URL
 
   container
     .querySelectorAll(".copy")
@@ -230,22 +221,29 @@ function ativarBotoes(container) {
 
         const url = botao.dataset.url;
 
+        if (!url) return;
+
         try {
 
           await navigator.clipboard.writeText(url);
+
+          const textoOriginal =
+            botao.textContent;
 
           botao.textContent = "Copiado!";
 
           setTimeout(() => {
 
-            botao.textContent = "Copiar URL";
+            botao.textContent =
+              textoOriginal;
 
           }, 1500);
 
         } catch {
 
-          alert("Não foi possível copiar a URL.");
-
+          alert(
+            "Não foi possível copiar a URL."
+          );
         }
 
       });
@@ -253,39 +251,54 @@ function ativarBotoes(container) {
     });
 
 
+  // USAR NO SITE
+
   container
     .querySelectorAll(".use-site")
     .forEach(botao => {
 
       botao.addEventListener("click", () => {
 
+        const url =
+          botao.dataset.url;
+
+        const nome =
+          botao.dataset.name;
+
+        if (!url) return;
+
         abrirEscolhaLocal(
-          botao.dataset.url,
-          botao.dataset.name
+          url,
+          nome
         );
 
       });
 
     });
-
 }
 
 
 // ===============================
-// ESCOLHER LOCAL
+// JANELA "USAR NO SITE"
 // ===============================
 
 function abrirEscolhaLocal(url, nome) {
 
-  const modal = document.createElement("div");
+  const modal =
+    document.createElement("div");
 
-  modal.className = "site-modal";
+  modal.className =
+    "site-modal";
+
 
   modal.innerHTML = `
 
     <div class="site-modal-box">
 
-      <button class="site-modal-close">
+      <button
+        class="site-modal-close"
+        type="button"
+      >
         ×
       </button>
 
@@ -297,19 +310,31 @@ function abrirEscolhaLocal(url, nome) {
 
       <div class="site-options">
 
-        <button data-local="capa">
+        <button
+          type="button"
+          data-local="capa"
+        >
           🏠 Capa
         </button>
 
-        <button data-local="galeria">
+        <button
+          type="button"
+          data-local="galeria"
+        >
           🖼️ Galeria
         </button>
 
-        <button data-local="projeto">
+        <button
+          type="button"
+          data-local="projeto"
+        >
           📁 Projeto
         </button>
 
-        <button data-local="perfil">
+        <button
+          type="button"
+          data-local="perfil"
+        >
           👤 Perfil
         </button>
 
@@ -318,8 +343,11 @@ function abrirEscolhaLocal(url, nome) {
     </div>
   `;
 
+
   document.body.appendChild(modal);
 
+
+  // FECHAR
 
   modal
     .querySelector(".site-modal-close")
@@ -330,16 +358,21 @@ function abrirEscolhaLocal(url, nome) {
     });
 
 
+  // ESCOLHER LOCAL
+
   modal
     .querySelectorAll(".site-options button")
     .forEach(botao => {
 
       botao.addEventListener("click", () => {
 
+        const local =
+          botao.dataset.local;
+
         aplicarFotoNoSite(
           url,
           nome,
-          botao.dataset.local
+          local
         );
 
         modal.remove();
@@ -347,15 +380,23 @@ function abrirEscolhaLocal(url, nome) {
       });
 
     });
-
 }
 
 
 // ===============================
-// COLOCAR FOTO NO SITE
+// APLICA FOTO NO SITE
 // ===============================
 
-function aplicarFotoNoSite(url, nome, local) {
+function aplicarFotoNoSite(
+  url,
+  nome,
+  local
+) {
+
+
+  // =============================
+  // CAPA
+  // =============================
 
   if (local === "capa") {
 
@@ -367,87 +408,193 @@ function aplicarFotoNoSite(url, nome, local) {
       hero.style.backgroundImage =
         `url("${url}")`;
 
-      alert("Foto colocada na Capa.");
+      hero.style.backgroundSize =
+        "cover";
 
+      hero.style.backgroundPosition =
+        "center";
+
+      mostrarAviso(
+        "Foto colocada na Capa."
+      );
     }
 
     return;
   }
 
+
+  // =============================
+  // GALERIA
+  // =============================
 
   if (local === "galeria") {
 
     const imagem =
-      document.querySelector(".gallery-large img");
+      document.querySelector(
+        ".gallery-large img"
+      );
 
     if (imagem) {
 
       imagem.src = url;
-      imagem.alt = nome;
 
-      alert("Foto colocada na Galeria.");
+      imagem.alt =
+        nome || "Imagem da galeria";
 
+      mostrarAviso(
+        "Foto colocada na Galeria."
+      );
     }
 
     return;
   }
 
+
+  // =============================
+  // PROJETO
+  // =============================
 
   if (local === "projeto") {
 
     const imagem =
-      document.querySelector(".gallery-large img");
+      document.querySelector(
+        ".gallery-large img"
+      );
 
     if (imagem) {
 
       imagem.src = url;
-      imagem.alt = nome;
 
-      alert("Foto colocada no Projeto.");
+      imagem.alt =
+        nome || "Imagem do projeto";
 
+      mostrarAviso(
+        "Foto colocada no Projeto."
+      );
     }
 
     return;
   }
 
+
+  // =============================
+  // PERFIL
+  // =============================
 
   if (local === "perfil") {
 
     const imagem =
-      document.querySelector(".walker-logo img");
+      document.querySelector(
+        ".walker-logo img"
+      );
 
     if (imagem) {
 
       imagem.src = url;
 
-      alert("Foto colocada no Perfil.");
+      imagem.alt =
+        nome || "Perfil";
 
+      mostrarAviso(
+        "Foto colocada no Perfil."
+      );
     }
 
     return;
   }
-
 }
 
 
 // ===============================
-// SEGURANÇA
+// AVISO NA TELA
+// ===============================
+
+function mostrarAviso(mensagem) {
+
+  const aviso =
+    document.createElement("div");
+
+  aviso.textContent =
+    mensagem;
+
+  aviso.style.position =
+    "fixed";
+
+  aviso.style.left =
+    "50%";
+
+  aviso.style.bottom =
+    "25px";
+
+  aviso.style.transform =
+    "translateX(-50%)";
+
+  aviso.style.background =
+    "#0d1b2a";
+
+  aviso.style.color =
+    "#fff";
+
+  aviso.style.padding =
+    "14px 20px";
+
+  aviso.style.borderRadius =
+    "12px";
+
+  aviso.style.zIndex =
+    "99999";
+
+  aviso.style.boxShadow =
+    "0 8px 30px rgba(0,0,0,.3)";
+
+  document.body.appendChild(aviso);
+
+
+  setTimeout(() => {
+
+    aviso.remove();
+
+  }, 2000);
+}
+
+
+// ===============================
+// PROTEÇÃO HTML
 // ===============================
 
 function escaparHTML(texto) {
 
   return String(texto)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
 
+    .replace(
+      /&/g,
+      "&amp;"
+    )
+
+    .replace(
+      /</g,
+      "&lt;"
+    )
+
+    .replace(
+      />/g,
+      "&gt;"
+    )
+
+    .replace(
+      /"/g,
+      "&quot;"
+    )
+
+    .replace(
+      /'/g,
+      "&#039;"
+    );
 }
 
 
 // ===============================
-// ATIVAR BOTÕES EXISTENTES
+// INICIALIZAÇÃO
 // ===============================
 
 ativarBotoes(document);
@@ -458,24 +605,29 @@ ativarBotoes(document);
 // ===============================
 
 const startButton =
-  document.getElementById("startButton");
+  document.getElementById(
+    "startButton"
+  );
 
 if (startButton) {
 
-  startButton.addEventListener("click", () => {
+  startButton.addEventListener(
+    "click",
+    () => {
 
-    const plataforma =
-      document.getElementById("plataforma");
+      const plataforma =
+        document.getElementById(
+          "plataforma"
+        );
 
-    if (plataforma) {
+      if (plataforma) {
 
-      plataforma.scrollIntoView({
-        behavior: "smooth"
-      });
+        plataforma.scrollIntoView({
+          behavior: "smooth"
+        });
+
+      }
 
     }
-
-  });
-
+  );
 }
-
