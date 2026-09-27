@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Walker Mídia — Infraestrutura de mídia</title>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<header class="header">
+
+  <div class="header-left">
+
+    <div class="walker-logo">
+      <img
+        src="https://res.cloudinary.com/mb1eetro/image/upload/f_jpg,q_auto,w_300/v1790455219/kt9fx6ijju966fwz6dxa.heic"
+        alt="Walker Mídia"
+      >
+    </div>
+
+    <div class="brand">
+      <strong>Walker</strong>
+      <span>MÍDIA</span>
+    </div>
+
+  </div>
+
+  <nav>
+    <a href="#plataforma">Plataforma</a>
+    <a href="#recursos">Recursos</a>
+    <a href="#solucoes">Soluções</a>
+    <a href="#precos">Preços</a>
+    <a href="#docs">Desenvolvedores</a>
+  </nav>
+
+  <div class="header-buttons">
+    <button class="login">Entrar</button>
+    <button class="create">Criar conta</button>
+  </div>
+
+</header>
+
+<main>
+
+<section class="hero">
+
+  <div class="hero-content">
+
+    <div class="tag">
+      🦉 WALKER MÍDIA
+    </div>
+
+    <h1>
+      Infraestrutura de mídia
+      <span>para projetos digitais.</span>
+    </h1>
+
+    <p>
+      Armazene, organize e entregue suas imagens
+      e vídeos para sites, aplicativos e projetos digitais.
+    </p>
+
+    <div class="hero-buttons">
+
+      <button
+        class="primary"
+        id="startButton"
+      >
+        Começar gratuitamente →
+      </button>
+
+      <button
+        class="secondary"
+        onclick="document.getElementById('plataforma').scrollIntoView({behavior:'smooth'})"
+      >
+        Ver plataforma
+      </button>
+
+    </div>
+
+    <div class="hero-info">
+      ✓ Conta Free
+      &nbsp;&nbsp;
+      ✓ Upload de imagens e vídeos
+      &nbsp;&nbsp;
+      ✓ URLs de mídia
+    </div>
+
+  </div>
+
+
+  <div class="dashboard">
+
+    <div class="dashboard-top">
+
+      <div class="dash-brand">
+
+        <div class="dash-owl">
+
+          <img
+            src="https://res.cloudinary.com/mb1eetro/image/upload/f_jpg,q_auto,w_300/v1790455219/kt9fx6ijju966fwz6dxa.heic"
+            alt="Walker"
+          >
+
+        </div>
+
+        <div>
+
+          <strong>
+            Walker Mídia
+          </strong>
+
+          <small>
+            Minha biblioteca
+          </small>
+
+        </div>
+
+      </div>
+
+      <div class="free">
+        FREE
+      </div>
+
+    </div>
+
+
+    <div class="dashboard-menu">
+
+      <span class="active">
+        Arquivos
+      </span>
+
+      <span>
+        Projetos
+      </span>
+
+      <span>
+        URLs
+      </span>
+
+    </div>
+
+
+    <div class="dash-title">
+
+      <div>
+
+        <small>
+          Biblioteca de mídia
+        </small>
+
+        <h3>
+          Seus arquivos
+        </h3>
+
+      </div>
+
+      <button id="uploadButton">
+        ↑ Upload
+      </button>
+
+    </div>
+
+
+    <input
+      type="file"
+      id="fileInput"
+      accept="image/*,video/*"
+      hidden
+    >
+
+
+    <div
+      id="uploadStatus"
+      class="upload-status"
+    ></div>
+
+
+    <div
+      id="mediaGrid"
+      class="media-grid"
+    >
+
+      <div class="media-card">
+
+        <div class="media-image">
+
+          <img
+            src="https://res.cloudinary.com/mb1eetro/image/upload/f_jpg,q_auto,w_700/v1790455219/kt9fx6ijju966fwz6dxa.heic"
+            alt="Walker"
+          >
+
+        </div>
+
+        <div class="media-info">
+
+          <strong>
+            walker-corujinha.jpg
+          </strong>
+
+          <span>
+            JPG · Imagem
+          </span>
+
+          <div class="media-url">
+            walker/m/walker-corujinha.jpg
+          </div>
+
+          <button
+            class="copy"
+            data-url="https://res.cloudinary.com/mb1eetro/image/upload/f_jpg,q_auto,w_1200/v1790455219/kt9fx6ijju966fwz6dxa.heic"
+          >
+            Copiar URL
+          </button>
+
+          <button
+            class="use-site"
+            data-url="https://res.cloudinary.com/mb1eetro/image/upload/f_jpg,q_auto,w_1200/v1790455219/kt9fx6ijju966fwz6dxa.heic"
+            data-name="walker-corujinha.jpg"
+          >
+            Usar no site
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <div class="media-card">
+
+        <div class="media-image">
+
+          <img
+            src="https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=700&q=80"
+            alt="Projeto"
+          >
+
+        </div>
+
+        <div class="media-info">
+
+          <strong>
+            projeto-escritorio.jpg
+          </strong>
+
+          <span>
+            JPG · Imagem
+          </span>
+
+          <div class="media-url">
+            walker/m/projeto-escritorio.jpg
+          </div>
+
+          <button
+            class="copy"
+            data-url="https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=700&q=80"
+          >
+            Copiar URL
+          </button>
+
+          <button
+            class="use-site"
+            data-url="https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=700&q=80"
+            data-name="projeto-escritorio.jpg"
+          >
+            Usar no site
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div
+      class="upload-box"
+      id="uploadBox"
+    >
+
+      <div class="upload-symbol">
+        ↑
+      </div>
+
+      <strong>
+        Adicionar mídia
+      </strong>
+
+      <span>
+        Clique aqui para escolher uma imagem ou vídeo
+      </span>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<section class="numbers">
+
+  <div>
+    <strong>∞</strong>
+    <span>Projetos digitais</span>
+  </div>
+
+  <div>
+    <strong>24/7</strong>
+    <span>Disponibilidade</span>
+  </div>
+
+  <div>
+    <strong>API</strong>
+    <span>Integração</span>
+  </div>
+
+  <div>
+    <strong>URL</strong>
+    <span>Para sua mídia</span>
+  </div>
+
+</section>
+
+
+<section id="plataforma" class="section">
+
+  <div class="section-heading">
+
+    <span>PLATAFORMA</span>
+
+    <h2>
+      Tudo para sua mídia.
+    </h2>
+
+    <p>
+      Uma infraestrutura criada para organizar
+      e entregar os arquivos dos seus projetos.
+    </p>
+
+  </div>
+
+
+  <div class="feature-grid">
+
+    <div class="feature">
+
+      <div class="feature-icon">
+        ↑
+      </div>
+
+      <h3>
+        Upload
+      </h3>
+
+      <p>
+        Envie fotos e vídeos para sua biblioteca.
+      </p>
+
+    </div>
+
+
+    <div class="feature">
+
+      <div class="feature-icon">
+        ▦
+      </div>
+
+      <h3>
+        Biblioteca
+      </h3>
+
+      <p>
+        Encontre e organize todos os seus arquivos.
+      </p>
+
+    </div>
+
+
+    <div class="feature">
+
+      <div class="feature-icon">
+        🔗
+      </div>
+
+      <h3>
+        URLs
+      </h3>
+
+      <p>
+        Copie o endereço da sua mídia.
+      </p>
+
+    </div>
+
+
+    <div class="feature">
+
+      <div class="feature-icon">
+        ⚡
+      </div>
+
+      <h3>
+        Entrega
+      </h3>
+
+      <p>
+        Prepare suas mídias para sites e aplicativos.
+      </p>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<section id="recursos" class="gallery-section">
+
+  <div class="section-heading">
+
+    <span>MEDIA LIBRARY</span>
+
+    <h2>
+      Suas imagens em um só lugar.
+    </h2>
+
+    <p>
+      Organize seus arquivos e tenha uma biblioteca
+      central para seus projetos.
+    </p>
+
+  </div>
+
+
+  <div class="gallery">
+
+    <div class="gallery-large">
+
+      <img
+        src="https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=1200&q=85"
+        alt="Escritório"
+      >
+
+      <div class="gallery-label">
+        projeto-site.jpg
+      </div>
+
+    </div>
+
+
+    <div>
+
+      <img
+        src="https://images.unsplash.com/photo-1511818966892-d7d671e672a2?auto=format&fit=crop&w=700&q=80"
+        alt="Arquitetura"
+      >
+
+    </div>
+
+
+    <div>
+
+      <img
+        src="https://images.unsplash.com/photo-1449157291145-7efd050a4d0e?auto=format&fit=crop&w=700&q=80"
+        alt="Prédio"
+      >
+
+    </div>
+
+
+    <div>
+
+      <img
+        src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=700&q=80"
+        alt="Edifício"
+      >
+
+    </div>
+
+
+    <div>
+
+      <img
+        src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=700&q=80"
+        alt="Escritório"
+      >
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<section id="solucoes" class="solutions">
+
+  <div class="section-heading">
+
+    <span>SOLUÇÕES</span>
+
+    <h2>
+      Feito para diferentes projetos.
+    </h2>
+
+  </div>
+
+
+  <div class="solution-grid">
+
+    <article>
+
+      <div class="solution-number">
+        01
+      </div>
+
+      <h3>
+        Sites
+      </h3>
+
+      <p>
+        Hospede as imagens utilizadas
+        nas páginas do seu site.
+      </p>
+
+      <a href="#">
+        Saiba mais →
+      </a>
+
+    </article>
+
+
+    <article>
+
+      <div class="solution-number">
+        02
+      </div>
+
+      <h3>
+        Aplicativos
+      </h3>
+
+      <p>
+        Organize imagens e vídeos
+        utilizados pelos aplicativos.
+      </p>
+
+      <a href="#">
+        Saiba mais →
+      </a>
+
+    </article>
+
+
+    <article>
+
+      <div class="solution-number">
+        03
+      </div>
+
+      <h3>
+        Projetos digitais
+      </h3>
+
+      <p>
+        Uma biblioteca central para
+        os arquivos dos seus projetos.
+      </p>
+
+      <a href="#">
+        Saiba mais →
+      </a>
+
+    </article>
+
+  </div>
+
+</section>
+
+
+<section id="docs" class="developer-section">
+
+  <div>
+
+    <span>
+      PARA DESENVOLVEDORES
+    </span>
+
+    <h2>
+      Sua mídia.
+      <br>
+      Integrada ao seu projeto.
+    </h2>
+
+    <p>
+      O Walker Mídia será preparado para
+      integração por API, permitindo que
+      seus projetos trabalhem diretamente
+      com sua biblioteca de mídia.
+    </p>
+
+    <button class="dark-button">
+      Ver documentação →
+    </button>
+
+  </div>
+
+
+  <div class="code-window">
+
+    <div class="code-top">
+
+      <span></span>
+      <span></span>
+      <span></span>
+
+    </div>
+
+<pre>
+const imagem = {
+  nome: "fachada.jpg",
+  tipo: "image",
+  url: "walker/m/fachada.jpg"
+};
+
+upload(imagem);
+</pre>
+
+  </div>
+
+</section>
+
+
+<section class="future">
+
+  <div class="future-content">
+
+    <span>
+      PRÓXIMA FASE
+    </span>
+
+    <h2>
+      Walker Storage
+    </h2>
+
+    <p>
+      A infraestrutura própria de armazenamento
+      do Walker Mídia.
+    </p>
+
+    <div class="future-tags">
+
+      <span>Storage</span>
+      <span>API</span>
+      <span>CDN</span>
+      <span>Database</span>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<section id="precos" class="cta">
+
+  <div>
+
+    <span>
+      WALKER MÍDIA
+    </span>
+
+    <h2>
+      Comece a construir
+      sua biblioteca de mídia.
+    </h2>
+
+    <p>
+      Crie sua conta e comece gratuitamente.
+    </p>
+
+  </div>
+
+  <button>
+    Criar conta grátis →
+  </button>
+
+</section>
+
+</main>
+
+
+<footer>
+
+  <div class="footer-content">
+
+    <div class="footer-brand">
+
+      <div class="footer-logo">
+        🦉 Walker Mídia
+      </div>
+
+      <p>
+        Infraestrutura de mídia
+        para projetos digitais.
+      </p>
+
+    </div>
+
+
+    <div>
+
+      <strong>
+        Produto
+      </strong>
+
+      <a href="#plataforma">
+        Plataforma
+      </a>
+
+      <a href="#recursos">
+        Recursos
+      </a>
+
+      <a href="#precos">
+        Preços
+      </a>
+
+    </div>
+
+
+    <div>
+
+      <strong>
+        Desenvolvedores
+      </strong>
+
+      <a href="#docs">
+        Documentação
+      </a>
+
+      <a href="#docs">
+        API
+      </a>
+
+      <a href="#docs">
+        Guias
+      </a>
+
+    </div>
+
+
+    <div>
+
+      <strong>
+        Walker
+      </strong>
+
+      <a href="#">
+        Sobre
+      </a>
+
+      <a href="#">
+        Contato
+      </a>
+
+      <a href="#">
+        Termos
+      </a>
+
+    </div>
+
+  </div>
+
+
+  <div class="footer-bottom">
+
+    <span>
+      © 2026 Walker Mídia
+    </span>
+
+    <span>
+      Infraestrutura de mídia para projetos digitais.
+    </span>
+
+  </div>
+
+</footer>
+
+
+<script src="script.js"></script>
+
+</body>
+</html>
