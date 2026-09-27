@@ -49,7 +49,6 @@ async function enviarArquivo(arquivo) {
   formData.append("file", arquivo);
   formData.append("upload_preset", UPLOAD_PRESET);
 
-
   try {
 
     const resposta = await fetch(
@@ -60,38 +59,47 @@ async function enviarArquivo(arquivo) {
       }
     );
 
-
     const dados = await resposta.json();
 
-    console.log("RESPOSTA CLOUDINARY:", dados);
-
+    console.log("Cloudinary:", dados);
 
     if (!resposta.ok) {
 
-      const mensagem =
+      throw new Error(
         dados.error?.message ||
-        "Erro desconhecido no Cloudinary.";
+        "Erro no upload."
+      );
 
-      throw new Error(mensagem);
     }
-
 
     if (!dados.secure_url) {
 
       throw new Error(
-        "O Cloudinary não retornou a URL da imagem."
+        "Cloudinary não retornou a URL."
       );
 
     }
 
 
-    // SUCESSO
+    // ===============================
+    // ATUALIZA O CARD EXISTENTE
+    // ===============================
+
+    atualizarFotoPrincipal(
+      dados.secure_url,
+      arquivo.name,
+      arquivo.type
+    );
+
+
+    // ===============================
+    // MOSTRA URL
+    // ===============================
 
     uploadStatus.innerHTML = `
       <strong>Upload concluído!</strong>
-      <br>
-      URL gerada:
-      <br>
+      <br><br>
+
       <a
         href="${dados.secure_url}"
         target="_blank"
@@ -102,16 +110,9 @@ async function enviarArquivo(arquivo) {
     `;
 
 
-    adicionarMidia(
-      dados.secure_url,
-      arquivo.name,
-      arquivo.type
-    );
-
-
   } catch (erro) {
 
-    console.error("ERRO UPLOAD:", erro);
+    console.error("Erro:", erro);
 
     uploadStatus.innerHTML = `
       <strong>Erro no upload</strong>
@@ -121,94 +122,96 @@ async function enviarArquivo(arquivo) {
 
   }
 
-
   fileInput.value = "";
-
 }
 
 
 // ===============================
-// ADICIONAR NA BIBLIOTECA
+// ATUALIZAR O CARD DA BIBLIOTECA
 // ===============================
 
-function adicionarMidia(url, nome, tipo) {
+function atualizarFotoPrincipal(url, nome, tipo) {
 
-  const card = document.createElement("article");
+  const primeiroCard =
+    mediaGrid.querySelector(".media-card");
 
-  card.className = "media-card";
-
-
-  let visual;
+  if (!primeiroCard) return;
 
 
-  if (tipo.startsWith("video/")) {
+  const imagem =
+    primeiroCard.querySelector(".media-image img");
 
-    visual = `
-      <div class="media-image">
-        <video
-          src="${url}"
-          controls
-          style="width:100%;height:100%;object-fit:cover;"
-        ></video>
-      </div>
-    `;
+  const nomeArquivo =
+    primeiroCard.querySelector(".media-info strong");
 
-  } else {
+  const tipoArquivo =
+    primeiroCard.querySelector(".media-info span");
 
-    visual = `
-      <div class="media-image">
-        <img
-          src="${url}"
-          alt="${escaparHTML(nome)}"
-        >
-      </div>
-    `;
+  const urlArquivo =
+    primeiroCard.querySelector(".media-url");
+
+  const botaoCopiar =
+    primeiroCard.querySelector(".copy");
+
+  const botaoUsar =
+    primeiroCard.querySelector(".use-site");
+
+
+  // FOTO
+
+  if (imagem) {
+
+    imagem.src = url;
+    imagem.alt = nome;
 
   }
 
 
-  card.innerHTML = `
+  // NOME
 
-    ${visual}
+  if (nomeArquivo) {
 
-    <div class="media-info">
+    nomeArquivo.textContent = nome;
 
-      <strong>
-        ${escaparHTML(nome)}
-      </strong>
-
-      <span>
-        ${tipo || "mídia"}
-      </span>
-
-      <div class="media-url">
-        ${escaparHTML(url)}
-      </div>
-
-      <button
-        class="copy"
-        data-url="${url}"
-      >
-        Copiar URL
-      </button>
-
-      <button
-        class="use-site"
-        data-url="${url}"
-        data-name="${escaparHTML(nome)}"
-      >
-        Usar no site
-      </button>
-
-    </div>
-
-  `;
+  }
 
 
-  mediaGrid.appendChild(card);
+  // TIPO
+
+  if (tipoArquivo) {
+
+    tipoArquivo.textContent =
+      tipo || "Imagem";
+
+  }
 
 
-  ativarBotoes(card);
+  // URL
+
+  if (urlArquivo) {
+
+    urlArquivo.textContent = url;
+
+  }
+
+
+  // BOTÃO COPIAR
+
+  if (botaoCopiar) {
+
+    botaoCopiar.dataset.url = url;
+
+  }
+
+
+  // BOTÃO USAR NO SITE
+
+  if (botaoUsar) {
+
+    botaoUsar.dataset.url = url;
+    botaoUsar.dataset.name = nome;
+
+  }
 
 }
 
@@ -218,9 +221,6 @@ function adicionarMidia(url, nome, tipo) {
 // ===============================
 
 function ativarBotoes(container) {
-
-
-  // COPIAR URL
 
   container
     .querySelectorAll(".copy")
@@ -253,8 +253,6 @@ function ativarBotoes(container) {
     });
 
 
-  // USAR NO SITE
-
   container
     .querySelectorAll(".use-site")
     .forEach(botao => {
@@ -283,7 +281,6 @@ function abrirEscolhaLocal(url, nome) {
 
   modal.className = "site-modal";
 
-
   modal.innerHTML = `
 
     <div class="site-modal-box">
@@ -292,9 +289,7 @@ function abrirEscolhaLocal(url, nome) {
         ×
       </button>
 
-      <h2>
-        Usar no site
-      </h2>
+      <h2>Usar no site</h2>
 
       <p>
         Onde você quer colocar esta foto?
@@ -321,9 +316,7 @@ function abrirEscolhaLocal(url, nome) {
       </div>
 
     </div>
-
   `;
-
 
   document.body.appendChild(modal);
 
@@ -343,12 +336,10 @@ function abrirEscolhaLocal(url, nome) {
 
       botao.addEventListener("click", () => {
 
-        const local = botao.dataset.local;
-
         aplicarFotoNoSite(
           url,
           nome,
-          local
+          botao.dataset.local
         );
 
         modal.remove();
@@ -365,7 +356,6 @@ function abrirEscolhaLocal(url, nome) {
 // ===============================
 
 function aplicarFotoNoSite(url, nome, local) {
-
 
   if (local === "capa") {
 
@@ -441,7 +431,7 @@ function aplicarFotoNoSite(url, nome, local) {
 
 
 // ===============================
-// SEGURANÇA HTML
+// SEGURANÇA
 // ===============================
 
 function escaparHTML(texto) {
@@ -469,7 +459,6 @@ ativarBotoes(document);
 
 const startButton =
   document.getElementById("startButton");
-
 
 if (startButton) {
 
