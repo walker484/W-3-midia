@@ -1,470 +1,207 @@
-```javascript
 const CLOUD_NAME = "mb1eetro";
 const UPLOAD_PRESET = "walker-midia";
 
+const uploadButton = document.getElementById("uploadButton");
+const fileInput = document.getElementById("fileInput");
+const uploadBox = document.getElementById("uploadBox");
+const uploadStatus = document.getElementById("uploadStatus");
+const mediaGrid = document.getElementById("mediaGrid");
 
-const fileInput =
-  document.getElementById("fileInput");
+uploadButton.addEventListener("click", () => {
+  fileInput.click();
+});
 
-const uploadButton =
-  document.getElementById("uploadButton");
+uploadBox.addEventListener("click", () => {
+  fileInput.click();
+});
 
-const uploadBox =
-  document.getElementById("uploadBox");
+fileInput.addEventListener("change", async () => {
+  const arquivo = fileInput.files[0];
 
-const mediaGrid =
-  document.getElementById("mediaGrid");
+  if (!arquivo) return;
 
-const uploadStatus =
-  document.getElementById("uploadStatus");
+  await enviarArquivo(arquivo);
 
-
-/* =========================================
-   UPLOAD
-========================================= */
-
-uploadButton.addEventListener(
-  "click",
-  function() {
-    fileInput.click();
-  }
-);
-
-
-uploadBox.addEventListener(
-  "click",
-  function() {
-    fileInput.click();
-  }
-);
-
-
-fileInput.addEventListener(
-  "change",
-  function() {
-
-    const arquivo =
-      fileInput.files[0];
-
-    if (!arquivo) {
-      return;
-    }
-
-    enviarArquivo(arquivo);
-  }
-);
-
+  fileInput.value = "";
+});
 
 async function enviarArquivo(arquivo) {
 
-  uploadStatus.style.display = "block";
+  uploadStatus.textContent = "Enviando imagem...";
 
-  uploadStatus.textContent =
-    "Enviando mídia...";
+  const formData = new FormData();
 
-
-  const formData =
-    new FormData();
-
-
-  formData.append(
-    "file",
-    arquivo
-  );
-
-
-  formData.append(
-    "upload_preset",
-    UPLOAD_PRESET
-  );
-
+  formData.append("file", arquivo);
+  formData.append("upload_preset", UPLOAD_PRESET);
 
   try {
 
-    const resposta =
-      await fetch(
-        "https://api.cloudinary.com/v1_1/" +
-        CLOUD_NAME +
-        "/auto/upload",
-        {
-          method: "POST",
-          body: formData
-        }
-      );
+    const resposta = await fetch(
+      `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/auto/upload`,
+      {
+        method: "POST",
+        body: formData
+      }
+    );
 
+    const dados = await resposta.json();
 
-    const data =
-      await resposta.json();
+    console.log("Cloudinary:", dados);
 
-
-    if (!resposta.ok) {
-
+    if (!resposta.ok || !dados.secure_url) {
       throw new Error(
-        data.error?.message ||
-        "Erro no upload"
+        dados.error?.message || "Não foi possível enviar a imagem."
       );
-
     }
 
-
-    let url =
-      data.secure_url;
-
-
-    if (
-      arquivo.type.startsWith("image/")
-    ) {
-
-      url =
-        url.replace(
-          "/image/upload/",
-          "/image/upload/f_jpg,q_auto,w_1200/"
-        );
-
-    }
-
+    uploadStatus.textContent = "Imagem enviada com sucesso!";
 
     adicionarMidia(
-      url,
+      dados.secure_url,
       arquivo.name,
       arquivo.type
     );
-
-
-    uploadStatus.textContent =
-      "✓ Upload concluído!";
-
-
-    fileInput.value = "";
-
 
   } catch (erro) {
 
     console.error(erro);
 
     uploadStatus.textContent =
-      "Erro no upload: " +
-      erro.message;
-
+      "Erro no upload: " + erro.message;
   }
-
 }
 
+function adicionarMidia(url, nome, tipo) {
 
-/* =========================================
-   ADICIONAR MÍDIA
-========================================= */
+  const card = document.createElement("article");
 
-function adicionarMidia(
-  url,
-  nome,
-  tipo
-) {
+  card.className = "media-card";
 
-  const card =
-    document.createElement("div");
+  let visual = "";
 
-  card.className =
-    "media-card";
+  if (tipo.startsWith("video/")) {
 
-
-  const imagem =
-    document.createElement("div");
-
-  imagem.className =
-    "media-image";
-
-
-  if (
-    tipo.startsWith("video/")
-  ) {
-
-    const video =
-      document.createElement("video");
-
-    video.src = url;
-
-    video.controls = true;
-
-    video.style.width = "100%";
-
-    video.style.height = "100%";
-
-    video.style.objectFit = "cover";
-
-    imagem.appendChild(video);
+    visual = `
+      <video
+        src="${url}"
+        controls
+        class="media-preview"
+      ></video>
+    `;
 
   } else {
 
-    const img =
-      document.createElement("img");
-
-    img.src = url;
-
-    img.alt = nome;
-
-    imagem.appendChild(img);
-
+    visual = `
+      <img
+        src="${url}"
+        alt="${escaparHTML(nome)}"
+        class="media-preview"
+      >
+    `;
   }
 
+  card.innerHTML = `
 
-  const info =
-    document.createElement("div");
+    ${visual}
 
-  info.className =
-    "media-info";
+    <div class="media-info">
 
+      <strong>${escaparHTML(nome)}</strong>
 
-  const titulo =
-    document.createElement("strong");
+      <span>${tipo || "mídia"}</span>
 
-  titulo.textContent =
-    nome;
+      <div class="media-actions">
 
+        <button
+          class="copy"
+          data-url="${url}"
+        >
+          Copiar URL
+        </button>
 
-  const tipoArquivo =
-    document.createElement("span");
+        <button
+          class="use-site"
+          data-url="${url}"
+          data-name="${escaparHTML(nome)}"
+        >
+          Usar no site
+        </button>
 
-  tipoArquivo.textContent =
-    tipo.startsWith("video/")
-      ? "Vídeo"
-      : "Imagem";
+      </div>
 
+    </div>
+  `;
 
-  const urlBox =
-    document.createElement("div");
+  mediaGrid.appendChild(card);
 
-  urlBox.className =
-    "media-url";
+  ativarBotoes(card);
+}
 
-  urlBox.textContent =
-    url;
+function ativarBotoes(container) {
 
+  const botoesCopiar =
+    container.querySelectorAll(".copy");
 
-  /* =====================================
-     COPIAR URL
-  ===================================== */
+  botoesCopiar.forEach(botao => {
 
-  const copiar =
-    document.createElement("button");
+    botao.addEventListener("click", async () => {
 
-  copiar.className =
-    "copy";
-
-  copiar.textContent =
-    "Copiar URL";
-
-
-  copiar.addEventListener(
-    "click",
-    async function() {
+      const url = botao.dataset.url;
 
       try {
 
-        await navigator.clipboard.writeText(
-          url
-        );
+        await navigator.clipboard.writeText(url);
 
-        copiar.textContent =
-          "✓ Copiado";
+        botao.textContent = "Copiado!";
 
-
-        setTimeout(
-          function() {
-
-            copiar.textContent =
-              "Copiar URL";
-
-          },
-          1500
-        );
+        setTimeout(() => {
+          botao.textContent = "Copiar URL";
+        }, 1500);
 
       } catch {
 
-        copiar.textContent =
-          "Copie a URL";
-
+        alert("Não foi possível copiar a URL.");
       }
 
-    }
-  );
+    });
 
+  });
 
-  /* =====================================
-     USAR NO SITE
-  ===================================== */
+  const botoesUsar =
+    container.querySelectorAll(".use-site");
 
-  const usarNoSite =
-    document.createElement("button");
+  botoesUsar.forEach(botao => {
 
-  usarNoSite.className =
-    "use-site";
-
-  usarNoSite.textContent =
-    "Usar no site";
-
-
-  usarNoSite.addEventListener(
-    "click",
-    function() {
+    botao.addEventListener("click", () => {
 
       abrirEscolhaLocal(
-        url,
-        nome
+        botao.dataset.url,
+        botao.dataset.name
       );
 
-    }
-  );
+    });
 
-
-  info.appendChild(titulo);
-  info.appendChild(tipoArquivo);
-  info.appendChild(urlBox);
-  info.appendChild(copiar);
-  info.appendChild(usarNoSite);
-
-
-  card.appendChild(imagem);
-  card.appendChild(info);
-
-
-  mediaGrid.prepend(card);
-
-
-  /* Mantém somente 2 mídias na visualização */
-
-  while (
-    mediaGrid.children.length > 2
-  ) {
-
-    mediaGrid.lastElementChild.remove();
-
-  }
-
+  });
 }
 
+function abrirEscolhaLocal(url, nome) {
 
-/* =========================================
-   BOTÕES "COPIAR URL" DAS FOTOS EXISTENTES
-========================================= */
+  const modal = document.createElement("div");
 
-document
-  .querySelectorAll(".copy")
-  .forEach(
-    function(botao) {
-
-      botao.addEventListener(
-        "click",
-        async function() {
-
-          const url =
-            botao.dataset.url;
-
-          if (!url) {
-            return;
-          }
-
-
-          try {
-
-            await navigator.clipboard.writeText(
-              url
-            );
-
-            botao.textContent =
-              "✓ Copiado";
-
-
-            setTimeout(
-              function() {
-
-                botao.textContent =
-                  "Copiar URL";
-
-              },
-              1500
-            );
-
-          } catch {
-
-            botao.textContent =
-              "Copie a URL";
-
-          }
-
-        }
-      );
-
-    }
-  );
-
-
-/* =========================================
-   BOTÕES "USAR NO SITE" DAS FOTOS EXISTENTES
-========================================= */
-
-document
-  .querySelectorAll(".use-site")
-  .forEach(
-    function(botao) {
-
-      botao.addEventListener(
-        "click",
-        function() {
-
-          const url =
-            botao.dataset.url;
-
-          const nome =
-            botao.dataset.name ||
-            "imagem";
-
-          abrirEscolhaLocal(
-            url,
-            nome
-          );
-
-        }
-      );
-
-    }
-  );
-
-
-/* =========================================
-   JANELA PARA ESCOLHER O LOCAL
-========================================= */
-
-function abrirEscolhaLocal(
-  url,
-  nome
-) {
-
-  const modal =
-    document.createElement("div");
-
-  modal.className =
-    "site-modal";
-
+  modal.className = "site-modal";
 
   modal.innerHTML = `
 
     <div class="site-modal-box">
 
-      <button
-        class="site-modal-close"
-        aria-label="Fechar"
-      >
+      <button class="site-modal-close">
         ×
       </button>
 
-      <h2>
-        Usar esta foto no site
-      </h2>
+      <h2>Usar no site</h2>
 
       <p>
-        Onde você quer colocar:
-        <strong>${escaparHTML(nome)}</strong>?
+        Onde você quer colocar esta imagem?
       </p>
 
       <div class="site-options">
@@ -492,226 +229,153 @@ function abrirEscolhaLocal(
       </div>
 
     </div>
-
   `;
-
 
   document.body.appendChild(modal);
 
-
-  const fechar =
-    modal.querySelector(
-      ".site-modal-close"
-    );
-
-
-  fechar.addEventListener(
-    "click",
-    function() {
-
+  modal
+    .querySelector(".site-modal-close")
+    .addEventListener("click", () => {
       modal.remove();
+    });
 
-    }
-  );
+  modal
+    .querySelectorAll(".site-options button")
+    .forEach(botao => {
 
+      botao.addEventListener("click", () => {
 
-  modal.addEventListener(
-    "click",
-    function(event) {
+        const local = botao.dataset.local;
 
-      if (
-        event.target === modal
-      ) {
+        aplicarFotoNoSite(url, nome, local);
 
         modal.remove();
 
-      }
+      });
+
+    });
+}
+
+function aplicarFotoNoSite(url, nome, local) {
+
+  if (local === "capa") {
+
+    const hero = document.querySelector(".hero");
+
+    if (hero) {
+
+      hero.style.backgroundImage =
+        `url("${url}")`;
+
+      alert("Imagem colocada na Capa.");
 
     }
-  );
-
-
-  modal
-    .querySelectorAll("[data-local]")
-    .forEach(
-      function(botao) {
-
-        botao.addEventListener(
-          "click",
-          function() {
-
-            const local =
-              botao.dataset.local;
-
-
-            aplicarFotoNoSite(
-              url,
-              local
-            );
-
-
-            modal.remove();
-
-          }
-        );
-
-      }
-    );
-
-}
-
-
-/* =========================================
-   COLOCAR FOTO NO LOCAL ESCOLHIDO
-========================================= */
-
-function aplicarFotoNoSite(
-  url,
-  local
-) {
-
-  let elemento = null;
-
-
-  if (
-    local === "capa"
-  ) {
-
-    elemento =
-      document.querySelector(
-        ".hero"
-      );
-
-  }
-
-
-  if (
-    local === "galeria"
-  ) {
-
-    elemento =
-      document.querySelector(
-        ".gallery-large img"
-      );
-
-  }
-
-
-  if (
-    local === "perfil"
-  ) {
-
-    elemento =
-      document.querySelector(
-        ".walker-logo img"
-      );
-
-  }
-
-
-  if (
-    local === "projeto"
-  ) {
-
-    elemento =
-      document.querySelector(
-        ".gallery-large img"
-      );
-
-  }
-
-
-  if (
-    elemento &&
-    elemento.tagName === "IMG"
-  ) {
-
-    elemento.src =
-      url;
-
-
-    alert(
-      "✓ Foto colocada no site!"
-    );
-
 
     return;
-
   }
 
+  if (local === "galeria") {
 
-  if (
-    elemento
-  ) {
+    const imagem =
+      document.querySelector(".gallery-large img");
 
-    elemento.style.backgroundImage =
-      `url("${url}")`;
+    if (imagem) {
 
+      imagem.src = url;
+      imagem.alt = nome;
 
-    alert(
-      "✓ Foto colocada no site!"
-    );
+      alert("Imagem colocada na Galeria.");
 
+    }
 
     return;
-
   }
 
+  if (local === "projeto") {
 
-  const nomeLocal =
-    prompt(
-      "Digite onde você quer colocar esta foto:"
-    );
+    const imagem =
+      document.querySelector(".gallery-large img");
 
+    if (imagem) {
 
-  if (
-    nomeLocal
-  ) {
+      imagem.src = url;
+      imagem.alt = nome;
 
-    alert(
-      "✓ Foto selecionada para: " +
-      nomeLocal
-    );
+      alert("Imagem colocada no Projeto.");
 
+    }
+
+    return;
   }
 
+  if (local === "perfil") {
+
+    const imagem =
+      document.querySelector(".walker-logo img");
+
+    if (imagem) {
+
+      imagem.src = url;
+
+      alert("Imagem colocada no Perfil.");
+
+    }
+
+    return;
+  }
+
+  if (local === "outro") {
+
+    const lugar =
+      prompt("Digite o local onde quer colocar a imagem:");
+
+    if (lugar) {
+
+      alert(
+        `Imagem "${nome}" selecionada para: ${lugar}`
+      );
+
+    }
+
+  }
 }
 
-
-/* =========================================
-   PROTEÇÃO DO NOME DA FOTO
-========================================= */
-
-function escaparHTML(
-  texto
-) {
+function escaparHTML(texto) {
 
   return String(texto)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+
+// Ativa os botões que já existem no HTML
+ativarBotoes(document);
+
+
+// Botão principal da plataforma
+const startButton =
+  document.getElementById("startButton");
+
+if (startButton) {
+
+  startButton.addEventListener("click", () => {
+
+    const plataforma =
+      document.getElementById("plataforma");
+
+    if (plataforma) {
+
+      plataforma.scrollIntoView({
+        behavior: "smooth"
+      });
+
+    }
+
+  });
 
 }
 
 
-/* =========================================
-   BOTÃO COMEÇAR
-========================================= */
-
-document
-  .getElementById("startButton")
-  .addEventListener(
-    "click",
-    function() {
-
-      document
-        .getElementById("plataforma")
-        .scrollIntoView({
-          behavior: "smooth"
-        });
-
-    }
-  );
-```
